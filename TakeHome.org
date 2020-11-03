@@ -19,7 +19,7 @@
 
 
 \begin{abstract}
-Il Paper proposto dagli autori dimostra come sia possibile manipolare un algoritmo di apprendimento. Nello studio proposto il caso preso in esame è il problema denominato \emph{Multi-Armed Bandits problems} (MAB), questo tipo di problema potrebbe essere riassunto nel seguente modo: "scegliere tra un insieme di scelte indipendenti quella che possa generare il massimo guadagno". Sullo studio approfondito degli algoritmi che risolvono il problema MAB, gli autori del paper forniscono un metodo di analisi in grado di formulare il problema per dirottare il comportamento del decisore. Poiché esistono diversi algoritmi e diverse situazioni in cui il problema dei banditi viene applicato gli autori propongo in prima battuta una serie di algoritmi attaccanti specifici in base al tipo di problema MAB in analisi per giungere poi ad un algoritmo adattivo all'istanza specifica del problema. Questo è un risultato di grande importanza perchè non richiede nessun tipo di conoscenza preliminare sul problema base da parte dell'attaccante che si "adatta" al problema. Infine mostrano come al momento non esiste un decisore (algoritmo) che sia in grado di difendersi dagli attacchi proposti con l'algoritmo adattativo.  
+Il Paper proposto dagli autori dimostra come sia possibile manipolare il comportamento di un algoritmo di apprendimento. Nello studio proposto il caso preso in esame è il problema denominato \emph{Multi-Armed Bandits problems} (MAB), questo tipo di problema potrebbe essere riassunto nel seguente modo: "scegliere tra un insieme di scelte indipendenti quella che possa generare il massimo guadagno". Sullo studio approfondito degli algoritmi che risolvono il problema MAB, gli autori del paper forniscono un metodo di analisi in grado di formulare il problema per dirottare il comportamento del decisore. Poiché esistono diversi algoritmi e diverse situazioni in cui il problema dei banditi viene applicato gli autori propongo in prima battuta una serie di algoritmi attaccanti specifici in base al tipo di problema MAB in analisi, per giungere poi ad un algoritmo adattivo all'istanza specifica del problema. Questo è un risultato di grande importanza perchè non richiede nessun tipo di conoscenza preliminare sul problema base da parte dell'attaccante che si "adatta" al problema. Infine mostrano come al momento non esiste un decisore (algoritmo) che sia in grado di difendersi dagli attacchi proposti con l'algoritmo adattativo.  
 Il contributo portato da chi sta scrivendo questo testo è stato dimostrare la bontà degli algoritmi proposti dagli autori anche in problemi differenti rispetto a quelli studiati nel paper. 
 
 \begin{center}
@@ -33,19 +33,19 @@ Il contributo portato da chi sta scrivendo questo testo è stato dimostrare la b
 \clearpage
 
 * Contesto
-In questo capitolo vengono introdotte le nozioni necessarie per comprendere appieno gli argomenti trattati nel seguito, con particolare attenzione alla descrizione del problema MAB e alle varie strategie che risolvono il problema MAB sia nella versione offline che nella versione online. La differenza tra le due versioni è che nella versione /offline/ (o anche /batch/-learning) il sistema ri-stima i suoi parametri dopo aver ricevuto un numero ben definito di sample organizzati in /batch/ (lotti), nella versione /online/ il sistema ri-stima i propri parametri (ovvero la propria conoscenza) dopo aver campionato ogni sample.
+In questo capitolo vengono introdotte le nozioni necessarie per comprendere appieno gli argomenti trattati nel seguito, con particolare attenzione alla descrizione del problema MAB e alle varie strategie che risolvono il problema, sia nella versione /offline/ che nella versione /online/. La differenza tra le due versioni è che nella versione /offline/ (o anche /batch/-learning) il sistema ri-stima i suoi parametri dopo aver ricevuto un numero ben definito di sample organizzati in /batch/ (lotti), nella versione /online/ il sistema ri-stima i propri parametri (ovvero la propria conoscenza) dopo aver campionato ogni sample.
 
 Il lavoro è organizzato in questo modo: nel prossimo paragrafo verranno introdotte le nozioni di base al problema MAB con i principali algoritmi risolutivi, a seguire verrà descritto lo scenario in cui è presente un agente malintenzionato (attaccante). Nel secondo capitolo verranno elencati gli studi citati nel paper in analisi e nell'ultimo capitolo verrà approfondito ed analizzato lo studio condotto dagli autori Fang Liu e Ness Shroff.  
 
 ** Descrizione del problema
 Il problema noto come /Multi-Armed Bandits problems/ (MAB) è un problema in cui il /decisore/ deve scegliere tra un insieme di scelte indipendenti quella che possa generare il massimo guadagno. La probabilità che una determinata scelta possa generare una ricompensa (/reward/) è ignota all'inizio del processo, e può essere parzialmente appresa solo "provando" tali scelte. In caso contrario il decisore ovviamente sceglierebbe sempre la scelta con più alta probabilità di successo. Inolte, la probabilità di ricevere un reward è indipendente dalla scelta effettuata al tempo precedente. 
-Il decisore (noto anche come /giocatore/) deve quindi scegliere quale azione scegliere in base alla conoscenza acquisita sino a quel momento, deve valutare se conviene operare ancora la stessa scelta (che ritiene sia la scelta migliore) o "provare" un scelta nuova. Questa ultima considerazione rientra in un dilemma noto come *exploration vs exploitation* trade-off ovvero, il decisore deve lavorare in una "via di mezzo" tra effettuare la scelta ottima in base alla conoscenza acquisita e provare nuove scelte. Infatti decidere di non esploare nuove scelte potrebbe portare ad ottenere una ricompensa totale piccola, viceversa, continuare a esplorare nuove scelte porterebbe ad avere una scarsa conoscenza dell'ambiente (/environment/) e quindi operare scelte non ottime. La scelta della giusta "via di mezzo" è interpretata dall'algoritmo utilizzato, infatti molti algoritmi si differenziano proprio per come questa soglia viene selezionata.     
+Il decisore (noto anche come /giocatore/ o /agente/) deve quindi scegliere quale azione scegliere in base alla conoscenza acquisita sino a quel momento, deve valutare se conviene operare ancora la stessa scelta (che ritiene sia la scelta migliore) o "provare" un scelta nuova. Questa ultima considerazione rientra in un dilemma noto come *exploration vs exploitation* trade-off ovvero, il decisore deve lavorare in una "via di mezzo" tra effettuare la scelta ottima in base alla conoscenza acquisita e provare nuove scelte. Infatti, decidere di non esploare nuove scelte potrebbe portare ad ottenere una ricompensa totale piccola, viceversa, continuare a esplorare nuove scelte porterebbe ad avere una scarsa conoscenza dell'ambiente (/environment/) perchè si avrebbero pochi sample su cui valutare le alternative e quindi operare scelte potenzialmente non ottime. La scelta della giusta "via di mezzo" è interpretata dall'algoritmo utilizzato, infatti molti algoritmi si differenziano proprio per come questa soglia viene selezionata.     
 Spesso le scelte disponibili al decisore sono dette /braccia/ o /leve/ in paragone alle leve delle slot-machines, per cui "/tirare un braccio/" ha il significato di: "prendere una scelta".   
 
-Se definiamo una /politica/ $\pi$ come la sequenza delle decisioni $\pi_t$ prese in ogni istante $t \in T$, ovvero: $\pi = (\pi_t)_{t = 1}^T$, un indicatore di quanto una polita $\pi$ del giocatore sia buona è la funzione di *regret* (rammarico). Ogni volta che il decisore prende una decisione sub-ottima, ovvero con probabilità di ottenere un reward che non sia quella massima, il decisore a posteriori prova del rammarico tanto più alto quanto il valore ottenuto sia lontano dal profitto massimo ottenibile. Misura quindi la differenza tra il reward totale ottenibile da un oracolo che sceglierebbe sempre la scelta migliore e il reward cumulato durante tutti i tentativi collezionato dal decisore secondo la politica $\pi$ . 
+Se supponiamo che l'algoritmo lavori in tempo discreto con $t = 1,2,...,T$, possiamo definire una /politica/ $\pi$ come la sequenza delle decisioni $\pi_t$ prese in ogni istante $t \in T$, ovvero: $\pi = (\pi_t)_{t = 1}^T$. Un indicatore di quanto una polita $\pi$ del giocatore sia buona è la funzione di *regret* (rammarico): ogni volta che il decisore prende una decisione sub-ottima, ovvero con il valore atteso del reward che non sia quello massimo, il decisore a posteriori prova del rammarico tanto più alto quanto il valore ottenuto sia lontano dal profitto massimo ottenibile. Misura quindi la differenza tra il reward totale ottenibile da un oracolo che sceglierebbe sempre la scelta migliore e il reward cumulato durante tutti i tentativi collezionato dal decisore secondo la politica $\pi$ . 
 
 *Definizione del problema*
-Indichiamo con $A = {1,2,3,...,K}$ l'insieme delle possibili $K$ scelte e supponiamo che l'algoritmo lavori in tempo discreto con $t = 1,2,...,T$. Ad ogni time-step /t/ l'algoritmo prende la scelta $a_t \in A$ considerata ottima sino a quel momento ($\pi_t = a_t$) e in base alla scelta presa l'ambiente in cui l'agente opera genera una ricompensa (reward) $r_t \in \mathbb{R}$ con $r_t = \mu_{a_t} + n_t$ dove $\mu_a$ è il valore atteso del reward per il braccio $a$ e $n_t$ è un rumore additivo normale con media nulla $\sim N(0,\sigma^2)$. Il valore atteso dei reward $\mathbb{E}[r_t] = \mu_{a_t}$, ovvero il valore atteso della ricompensa scegliendo il braccio $a$ è $\mu_a$. Come già anticipato, i valori attesi $\mu_{a\in A}$ non sono noti a priori al giocatore. Una prima possibile strategia per il giocatore con cui scegliere $a_t$ potrebbe essere ad esempio $a_t = arg\max\limits_{a \in A} \mathbb{E}[r_a]$, in questo modo sceglieremmo il braccio sfruttando la conoscenza acquisita delle prove precedenti.   
+Indichiamo con $A = {1,2,3,...,K}$ l'insieme delle possibili $K$ scelte. Ad ogni time-step /t/ l'algoritmo prende la scelta $a_t \in A$ considerata ottima sino a quel momento ($\pi_t = a_t$) e in base alla scelta presa l'ambiente in cui l'agente opera genera una ricompensa (reward) $r_t \in \mathbb{R}$ con $r_t = \mu_{a_t} + n_t$ dove $\mu_a$ è il valore atteso del reward per il braccio $a_t$ e $n_t$ è un rumore additivo normale con media nulla e varianza $\sigma^2$, $\sim N(0,\sigma^2)$. Il valore atteso dei reward $\mathbb{E}[r_t] = \mu_{a_t}$, ovvero il valore atteso della ricompensa scegliendo il braccio $a_t$ è $\mu_{a_t}$. Come già anticipato, i valori attesi $\mu_{a\in A}$ non sono noti a priori al giocatore. Una prima possibile strategia per il giocatore con cui scegliere $a_t$ potrebbe essere ad esempio $a_t = arg\max\limits_{a \in A} \mathbb{E}_t[r_a]$, in questo modo sceglieremmo il braccio sfruttando la conoscenza acquisita delle prove precedenti.   
 Se $\pi$ è la politica del giocatore, il reward può essere espresso come: 
 
 #+NAME: eqn.reward
@@ -88,7 +88,7 @@ Di questa strategia è presente anche una variante molto popolare per cui la pro
 *** Agente UCB
 Molto simile a quanto visto per \epsilon-greedy anche UCB (Upper Confident Bound) si basa sulla stima della media empirica osservata dei reward e seleziona la scelta che presenta l'upper bound di ampiezza maggiore.  
 
-#+NAME:eqn.ucb 
+#+NAME: eqn.ucb
 \begin{equation}
 \forall t \in T, a_t = arg\max\limits_{a \in A} \hat{u}_a(t):= \hat{\mu}_a(t-1) + 3\sigma\sqrt{\frac{log(t)}{N_a(t-1)}}\tag{5} 
 \end{equation}
@@ -114,13 +114,13 @@ Con questa strategia il reward medio ottenuto è: 897.28
 p(\theta_a | x) = \frac{p(x|\theta_a)p(\theta_a)}{\int_{\theta'}p(x|\theta')p(\theta') \mathrm{d}\theta'}\tag{7}
 \end{equation}
 
-dove $p(\theta_a | x)$ è la probabilità a posteriori \pi_{a,t}, ed è ignota al modello, $p(x | \theta_a)$ è la verosimiglianza, ed indica la probabilità di aver osservato un certo dato $x$ (il reward) condizionato a un certo valore di $\theta_a$, mentre $p(\theta_a)$ è la distribuzione a priori (/prior/ ) del parametro $\theta_a$, \pi_0. In questo testo, nel caso in cui i reward siano distribuiti come una normale useremo come distribuzione a priori la /Jeffrey prior/ definita nella sua formulazione generale nel modo seguente: 
+dove $p(\theta_a | x)$ è la probabilità a posteriori \pi_{a,t}, ed è ignota al modello, $p(x | \theta_a)$ è la verosimiglianza, ed indica la probabilità di aver osservato un certo dato $x$ (il reward) condizionato a un certo valore di $\theta_a$, mentre $p(\theta_a)$ è la distribuzione a priori (/prior/ ) del parametro $\theta_a$, \pi_0. In questo testo, nel caso in cui i reward siano distribuiti come una normale useremo come distribuzione a priori la /Jeffrey prior/ definita, nella sua formulazione generale, nel modo seguente: 
 
 \[ p_J(\overline{\theta}) \propto \sqrt{\det \mathcal{I}(\overline{\theta})}\]
 
-dove $\overline{\theta}$ è il vettore dei parametri ignoti, per cui, la densità di probabilità è proporzionale alla radice quadrata del determinante dell'/informazione di Fisher/. Dalla equazione ref:eqn.bayes se $p(\theta)$ è gaussiana anche $p(\cdot,\theta)$ è gaussiana[fn:3] in quanto risulta essere un prodotto di gaussiane.
+dove $\overline{\theta}$ è il vettore dei parametri ignoti, per cui, la densità di probabilità è proporzionale alla radice quadrata del determinante dell'/informazione di Fisher/. Dalla equazione ref:eqn.bayes se $p(\theta)$ è gaussiana e $p(\cdot,\theta)$ è prodotto di gaussiane (verosimiglianza), allora anche $p(\theta,\cdot)$ è gaussiana[fn:3] in quanto risulta essere un prodotto di gaussiane.
 
-Inolte sappiamo che per distribuzioni canoniche esponenziali nella forma con $\theta \in \mathbb{R}$:
+Inolte sappiamo che per distribuzioni canoniche esponenziali, con $\theta \in \mathbb{R}$, nella forma :
  
 \[p(x | \theta) = A(x)exp(T(x)\theta - F(\theta))\tag{8}\]  
 
@@ -160,9 +160,9 @@ file:Figure/comaprison_1sigma.png
 [[file:Figure/Performance_Comparison_Binomiale.png]]
 
 ** Attacchi
-Un altro aspetto di valutazione degli algoritmi, è quanto siano sensibili ai disturbi o agli attacchi dall'esterno. Esistono diverse tipologie di attacco ad un sistema di apprendimento automatico, quella a cui qui si fa riferimento in questo testo e sarà sottintesa da ora in avanti è nota come /Adversarial Poisoning Attacks/: /Adversarial/ indica che rientra nella categoria degli attacchi per contraddittorio ed è una tecnica che tenta di ingannare i modelli fornendo input "ingannevoli" è spesso utilizzati per causare malfunzionamenti ai sistemi di machine learning (ML), /Poisoning Attacks/ è una tecnica che consiste nella contaminazione dei dati di training, questa tecnica è stata molto studiata per quasi tutti i modelli di apprendimento: dai modelli autoregressivi in [AZB16], ai modelli SVM in [BNL12] con estensione a kernel non lineari, [HPGDA17] su reti neurali, in [JLMZ18] su MAB-stocastici e in [MJLZ18] sulla versione /Contestual/-MAB fino anche in [XBBFER15] su modelli di features selection come LASSO e ridge. Questo tipo di attacco ha riscosso molto interesse nell'ultimo decennio, quando i modelli di apprendimento automatico (ML) hanno iniziato a diventare ampiamente usati in contesto industriale, ad esempio suggerire articoli o prodotti in siti di e-commece oppure per le campagne pubblicitarie e inserzioni sui siti web e sono spesso ri-stimati di frequente per adattarsi sempre meglio alle esperienze dei singoli utenti, in questo modo è anche possibile però inserire dati corrotti appositamente studiati per sfruttare vulnerabilità del modello di apprendimento. Sebbene siano molto studiati algoritmi di difesa per sistemi di /deep-learning/ e di /superfised learning/ ancora poco è stato fatto per i sistemi MAB sempre più usati in contesto industriale.  
+Un altro aspetto di valutazione degli algoritmi, è quanto siano sensibili ai disturbi o agli attacchi dall'esterno. Esistono diverse tipologie di attacco ad un sistema di apprendimento automatico, quella a cui qui si fa riferimento in questo testo e sarà sottintesa da ora in avanti è nota come /Adversarial Poisoning Attacks/: /Adversarial/ indica che rientra nella categoria degli attacchi per contraddittorio ed è una tecnica che tenta di ingannare i modelli fornendo input "ingannevoli", è spesso utilizzata per causare malfunzionamenti ai sistemi di machine learning (ML); /Poisoning Attacks/ è una tecnica che consiste nella contaminazione dei dati di training, questa tecnica è stata molto studiata per quasi tutti i modelli di apprendimento: dai modelli autoregressivi in [AZB16], ai modelli SVM in [BNL12] con estensione a kernel non lineari, [HPGDA17] su reti neurali, in [JLMZ18] su MAB-stocastici e in [MJLZ18] sulla versione /Contestual/-MAB fino anche in [XBBFER15] su modelli di features selection come LASSO e Ridge. Questo tipo di attacco ha riscosso molto interesse nell'ultimo decennio, quando i modelli di apprendimento automatico (ML) hanno iniziato a diventare ampiamente usati in contesto industriale, ad esempio suggerire articoli o prodotti in siti di e-commece oppure per le campagne pubblicitarie e inserzioni sui siti web e sono spesso ri-stimati per adattarsi sempre meglio alle esperienze dei singoli utenti. In questo modo è anche possibile però inserire dati corrotti appositamente studiati per sfruttare vulnerabilità del modello di apprendimento. Sebbene siano molto studiati algoritmi di difesa per sistemi di /deep-learning/ e di /superfised learning/ ancora poco è stato fatto per i sistemi MAB sempre più usati in contesto industriale.  
 
-Nel paper proposto viene messo sotto analisi quanto gli algoritmi per MAB siano robusti rispetto a piccole perturbazioni nei dati e vengono forniti degli algoritmi attaccanti che riescono a manipolare il comportamento dell'algoritmo MAB portandolo a scegliere una scelta sub-ottima scelta a piacere dall'attaccante. Gli algoritmi proposti sono sia per la versione offline sia per la versione online del problema MAB. Il contributo portato da chi sta scrivendo il testo è stato mostrare la bontà degli algoritmi forniti anche in situazioni differenti da quelle studiate, in particolare si analizza la situazione denominata /Multi-Batch/, verrà inoltre introdotta una variante all'algoritmo \epsilon-greedy, verrà modificata la distribuzione dei reward, è verrà adoperato un attacco al problema MAB che sfrutta l'algoritmo /BaSE/ (BAtch Succesive Eliminatios). Seppure in letteratura possiamo trovare studi che forniscono modelli di difesa agli attacchi provocati da una manipolazione nei dati di training (ad es: [GTK19] e [LMP18]) perdendo in prestazioni, Fang Liu e Ness Shroff dimostrano che non esistono algoritmi immuni da /Data Poisoning Attacks/ rispetto alla strategia da loro proposta nella configurazione MAB-offline. 
+Nel paper proposto viene messo sotto analisi quanto gli algoritmi per MAB siano robusti rispetto a piccole perturbazioni nei dati e vengono forniti degli algoritmi attaccanti che riescono a manipolare il comportamento dell'algoritmo MAB portandolo a scegliere una scelta sub-ottima scelta a piacere dall'attaccante. Gli algoritmi proposti sono: sia per la versione offline sia per la versione online del problema MAB. Il contributo portato da chi sta scrivendo il testo è stato mostrare la bontà degli algoritmi forniti anche in situazioni differenti da quelle studiate, in particolare si analizza la situazione denominata /Multi-Batch/, verrà inoltre introdotta una variante all'algoritmo \epsilon-greedy, verrà modificata la distribuzione dei reward, è verrà adoperato un attacco al problema MAB che sfrutta l'algoritmo /BaSE/ (BAtch Succesive Eliminatios). Seppure in letteratura possiamo trovare studi che forniscono modelli di difesa agli attacchi provocati da una manipolazione nei dati di training (ad es: [GTK19] e [LMP18]) perdendo in prestazioni, Fang Liu e Ness Shroff dimostrano che non esistono algoritmi immuni da /Data Poisoning Attacks/ rispetto alla strategia da loro proposta nella configurazione MAB-offline. 
 * Studi Correlati 
 In questa sezione vengono riportati gli studi citati dal paper di tutti è stato letto l'abstract, nel caso in cui siano stati necessari ulteriori chiarimenti sono state lette anche le sezioni di interesse. 
 
@@ -249,7 +249,7 @@ In questo lavoro, gli autori forniscono una struttura per studiare la robustezza
 * Studio del Paper
 
 Recentemente ([MJLZ18]), hanno dimostrano uno dei primi attacchi ad un problema MAB nella sua versione offline. In quel caso l'attaccante poteva manipolare i reward prima che venissero usati per l'update in modo da modificare il comportamento del decisore. Il risultato fondamentale raggiunto è stato dimostrare come una attacco ad un problema MAB possa essere formulato come un problema di ottimizzazione convessa.
-Come già introdotto nei capitoli precedenti, esistono numerose strategie e numerose varianti per risolvere il problema MAB, ognuna adattabile a situazioni particolari. Nei capitoli seguenti verranno studiati diversi algoritmi attaccanti, uno per ogni tipologia di strategia nella versione /offline/ per seguire poi alla descrizione della strategia /online/ e ad una formulazione generale della strategia di attacco.  
+Come già introdotto nei capitoli precedenti, esistono numerose strategie e numerose varianti per risolvere il problema MAB, ognuna adattabile a situazioni particolari. Nei capitoli seguenti verranno studiati diversi algoritmi attaccanti, uno per ogni tipologia di strategia nella versione /offline/ per seguire poi alla descrizione della strategia /online/ e ad una sua formulazione generale per strategia di attacco.  
 
 ** Definizione del problema 
 
@@ -264,13 +264,13 @@ Il costo totale pagato dall'attaccante $C(T)$ è calcolato come $C(T) = norma([\
 Se definiamo $a^*$ la scelta sub-ottima target dell'attaccante tale che $u_{a^*} < \max\limits_{a \in A} \mu_a$, allora l'obiettivo dell'attaccante è fare in modo che il decisore scelga $a^*$ come scelta ottima con probabilità $1-\delta \text{ con: } \delta > 0$. Ciò che si vuole fare però non è soltanto manipolare i dati affinché il comportamento dell'agente venga modificato, ma l'obiettivo è di farlo con un costo che sia il minimo possibile, ovvero l'attaccante vuole intervenire sui dati poche volte ed aggiungendo piccole dosi di errore di manipolazione al reward, in modo da non essere scoperto, o magari perchè inserire dati corrotti ha una costo pratico poi nella realtà in cui l'attaccante opera. Per cui è necessario, aggiungere un vincolo affinché $C(T)$ sia il più piccolo possibile per non essere scoperti. 
 
 ** Problema Offline. 
-Supponiamo che il sistema ri-stimi i sui parametri dopo aver acquisito batch di samples con lunghezza T per aggiornare la sua conoscenza. Allora $\forall t \in T$ il sistema seleziona una scelta $a_t$, a seguito della scelta presa l'ambiente genera un reward (ricompensa) ed invia la tupla $(a_t,r_t)_{t < T}$ al buffer che mantiene tutte le tuple in cui $t < T$. Prima che il buffer con tutte le $T$ tuple sia inviato al decisore, l'attaccante accede ai dati e manipola gli $r_t$ sommandoci un errore di manipolazione (ref:eqn.reward_mod). Il buffer modificato $(a_t,r'_t)_{t<T}$ viene inviato al decisore che aggiorna la sua conscenza senza sapere che è vittima di un attacco, per cui l'attaccante forza il decisore a scegliere all'istante $t = T+1$ la scelta $a^*$ ovvero $a_{T+1} = a^*$ con $C(T)$ minimo possibile.
+Supponiamo che il sistema ri-stimi i sui parametri dopo aver acquisito batch di samples con lunghezza $T$ per aggiornare la sua conoscenza. Allora $\forall t \in T$ il sistema seleziona una scelta $a_t$, a seguito della scelta presa l'ambiente genera un reward (ricompensa) ed invia la tupla $(a_t,r_t)_{t < T}$ al buffer che mantiene tutte le tuple in cui $t < T$. Prima che il buffer con tutte le $T$ tuple sia inviato al decisore, l'attaccante accede ai dati e manipola gli $r_t$ sommandoci un errore di manipolazione (ref:eqn.reward_mod). Il buffer modificato $(a_t,r'_t)_{t<T}$ viene inviato al decisore che aggiorna la sua conscenza senza sapere che è vittima di un attacco, per cui l'attaccante forza il decisore a scegliere all'istante $t = T+1$ la scelta $a^*$ ovvero $a_{T+1} = a^*$ con $C(T)$ minimo possibile.
 
-Definiamo $m_a := N_a(T)$ come il numero di volte che è stata presa la scelta $a$. $\forall a \in A$ definiamo $\overline{y_a} \in R^{m_a}$ il vettore dei reward ottenuti quando è presa la scelta $a$.
+Definiamo $m_a := N_a(T)$ come il numero di volte che è stata presa la scelta $a$ fino al tempo $T$. $\forall a \in A$ definiamo $\overline{y_a} \in R^{m_a}$ il vettore dei reward ottenuti quando è presa la scelta $a$.
 
 \[ \overline{y_a} := (r_t | a_t = a)^T\tag{13}\]
 
-e sia $\overline{\epsilon_a}$ la strategia dell'attaccante (ovvero tutti gli errori introdotti per forzare il comportamento dell'agente quando il braccio scelto $a_t = a$)
+e sia $\overline{\epsilon_a} \in R^{m_a}$ la strategia dell'attaccante (ovvero, tutti gli errori introdotti dall'attaccante per forzare il comportamento dell'agente quando il braccio scelto $a_t = a$)
 
 \[ \forall a \in A : \overline{\epsilon_a} := (\epsilon_a | a_t = a)^T\tag{14}\]
 
@@ -282,7 +282,7 @@ A questo punto possiamo definire il problema di ottimizzazione $P$ associato al 
 
 #+NAME: eqn.p
 \begin{equation}
-P :=  \min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{ vincoli: }\begin{cases}
+P :=  \min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{, con vincoli: }\begin{cases}
       \mathbb{P}(a_{T+1} = a^*) >= 1- \delta & \quad \forall a \neq a^*
  \end{cases}\tag{16}
 \end{equation}
@@ -313,19 +313,19 @@ Possiamo ora osservare che la quantità $\overline{y_a}$ è nota all'attaccante 
 \tilde{\mu}_a(t): avg_t(\overline{y_a})+  \frac{1}{N_a(t)} \overline{\epsilon_a}I(a_t = a)\tag{20} 
 \end{equation}
    
-Questa nuova formulazione varrà più comoda nelle dimostrazioni presentate nei prossimi capitoli. Per semplicità di notazione, nei prossimi capitoli useremo la seguente notazione: $avg_t(\overline{y_a}) \to avg(a)$ indicando il valore atteso stimato dei reward per il braccio $a$ al tempo T.Di seguito vengono proposte le strategie di attacco specifiche per ogni algoritmo. Per le simulazioni numeriche sono stati utilizzati gli stessi parametri del paper, in particolare: rumore campionato da una normale $\sim N(0,\sigma^2) \text{, con: }\sigma = 0.1$, il numero di scelte $K = 5$, il braccio (scelta) target $a^*$ dell'attaccante ha $\mu_a^* = 0$, mentre $\forall a \in A, a \neq a^*, \mu_a$ è estratta casualmente da una distribuzione uniforme $\sim U(0,1)$. Con questa configurazione, senza eseguire l'attacco, il braccio targhet non dovrebbe mai essere scelto come scelta ottima. Per valutare le performance raggiunte dagli algoritmi specifici di attacco si utilizza il ratio, definito in [MJLZ18] come:
+Questa nuova formulazione varrà più comoda nelle dimostrazioni presentate nei prossimi capitoli. Per semplicità di notazione, nei prossimi capitoli useremo la seguente notazione: $avg_t(\overline{y_a}) \to avg(a)$ indicando il valore atteso stimato dei reward per il braccio $a$ al tempo $T$. Di seguito vengono proposte le strategie di attacco specifiche per ogni algoritmo. Per le simulazioni numeriche sono stati utilizzati gli stessi parametri del paper, in particolare: rumore campionato da una normale $\sim N(0,\sigma^2) \text{, con: }\sigma = 0.1$, il numero di scelte $K = 5$, il braccio (scelta) target $a^*$ dell'attaccante ha $\mu_a^* = 0$ e si trova nella posizione $a_5, k = 5$, mentre $\forall a \in A, a \neq a^*, \mu_a$ è estratta casualmente da una distribuzione uniforme $\sim U(0,1)$. Con questa configurazione, senza eseguire l'attacco, il braccio targhet non dovrebbe mai essere scelto come scelta ottima. Per valutare le performance raggiunte dagli algoritmi specifici di attacco si utilizza il ratio, definito in [MJLZ18] come:
 \[ \frac{\| \overline{\epsilon}\|_2}{\| \overline{y}\|_2} = \sqrt{\frac{\sum_{a\in A} \| \overline{\epsilon_a}\|_2}{\sum_{a\in A} \| \overline{y_a}\|_2} }\tag{21} \] 
 
 e misura la frazione di costo rispetto al valore totale raggiunto dall'agente senza attacco.  
 
 *** $\epsilon$-greedy
-In questa sezione viene descritta la strategia di attacco ad un problema MAB che sfrutta l'algoritmo \epsilon-greedy. Il funzionamento di \epsilon-greedy è descritto da ref:eqn.egreedy. Il parametro \epsilon con cui l'algoritmo estrae casualmente una possibile scelta non è noto a priori e non può essere controllato dall'attaccante. Per fare in modo che il decisore selezioni la scelta $a^*$ è necessario che l'attaccante soddisfi questa condizione: $\forall a \in A, \tilde{\mu}_a^* \geq \tilde{\mu}_a$ ovvero il valore atteso dei reward di $a^*$ deve essere maggiore rispetto ai valori attesi per le altre possibile scelte. Inoltre deve essere che $\mathbb{P}(a_{T+1} = a^*) = 1 - \sigma$. Le due condizioni appena descritte possono essere riformulate come segue: $\tilde{\mu}_a^* \geq \tilde{\mu}_a + \xi$ con $\xi > 0$ è una variabile di scarto (o di surplus) comunemente usata nei problemi di ottimizzazione, chiaramente al diminuire di \xi anche $C(T)$ decresce. A livello pratico è anche possibile utilizzare l'uguaglianza: $\tilde{\mu}_a^* = \tilde{\mu}_a + \xi$, in questo modo la differenza tra il valore atteso della scelta $a^*$ e le altre possibili scelte sarà esattamente $\xi$.     
+In questa sezione viene descritta la strategia di attacco ad un problema MAB che sfrutta l'algoritmo \epsilon-greedy. Il funzionamento di \epsilon-greedy è descritto da ref:eqn.egreedy. Il parametro \epsilon con cui l'algoritmo estrae casualmente una possibile scelta non è noto a priori e non può essere controllato dall'attaccante. Per fare in modo che il decisore selezioni la scelta $a^*$ è necessario che l'attaccante soddisfi questa condizione: $\forall a \in A, \tilde{\mu}_a^* \geq \tilde{\mu}_a$ ovvero il valore atteso dei reward di $a^*$ deve essere maggiore rispetto ai valori attesi per le altre possibile scelte. Inoltre deve essere che $\mathbb{P}(a_{T+1} = a^*) = 1 - \sigma$. Le due condizioni appena descritte possono essere riformulate come segue: $\tilde{\mu}_a^* \geq \tilde{\mu}_a + \xi$ dove $\xi > 0$ è una variabile di scarto (o di surplus) comunemente usata nei problemi di ottimizzazione. Chiaramente al diminuire di \xi anche $C(T)$ decresce. A livello pratico è anche possibile utilizzare l'uguaglianza: $\tilde{\mu}_a^* = \tilde{\mu}_a + \xi$, in questo modo la differenza tra il valore atteso della scelta $a^*$ e le altre possibili scelte sarà esattamente $\xi$.     
 
 Possiamo definire quindi il problema di ottimizzazione $P_1$ derivato dal problema P in ref:eqn.p specializzandolo per l'istanza \epsilon-greedy del problema MAB in questo modo:
 
 #+NAME: eqn.p1
 \begin{equation}
-P_1 :=  min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{ vincoli: }\begin{cases}
+P_1 :=  min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{, con vincoli: }\begin{cases}
       \tilde{\mu}_a^*(T) \geq \tilde{\mu}_a(T) + \xi  & \quad \forall a \neq a^*
  \end{cases}\tag{22}
 \end{equation}
@@ -336,13 +336,13 @@ Questo problema di ottimizzazione implica che: $\mathbb{P}(a_{T+1}=a^*) = 1 - \f
 
 *Teorema 1.* $\forall \xi >0$, $\forall \overline{y_a}_{\in A}$ \exist almeno una soluzione ottima al problema P1 che sia lineare nei vincoli.
 
-Per dimostrare il Teorema 1 è sufficiente verificare che l'insieme delle soluzioni ammissibili non sia vuoto, ovvero trovare  una soluzione $\epsilon_a$ che soddisfi i vincoli. Partendo dalla definizione del vincolo: $\tilde{\mu}_{a^*}} \geq \tilde{\mu}_a + \xi$ e scomponendo i termini nelle varie componenti abbiamo:
+Per dimostrare il Teorema 1 è sufficiente verificare che l'insieme delle soluzioni ammissibili non sia vuoto, ovvero trovare  una soluzione $\overline{\epsilon_a}$ che soddisfi i vincoli. Partendo dalla definizione del vincolo: $\tilde{\mu}_{a^*}} \geq \tilde{\mu}_a + \xi$ e scomponendo i termini nelle varie componenti abbiamo:
 
-\[ (\overline{y_{a^*}} + \overline{\epsilon_{a^*}})I/m_{a^*} = (\overline{y_a} + \overline{\epsilon_a})I/m_a) + \xi \tag{23}\]  
+\[ (\overline{y_{a^*}} + \overline{\epsilon_{a^*}})1/m_{a^*} = (\overline{y_a} + \overline{\epsilon_a})1/m_a) + \xi \tag{23}\]  
 
-possiamo osservare che  $\forall (\xi > 0, \epsilon_{a^*}, y_a_{\in A})$:
+possiamo osservare che  $\forall \xi > 0, \forall \overline{\epsilon_{a^*}}, \forall \overline{y_a}_{\in A}$:
 
-\[\forall a \in A : \epsilon_a = [(\overline{y_{a^*}} + \overline{\epsilon_{a^*}})1/ma^* - \overline{y_a}1/ma - \xi]1\tag{24} \]
+\[\forall a \in A : \overline{\epsilon_a} = [(\overline{y_{a^*}} + \overline{\epsilon_{a^*}})1/ma^* - \overline{y_a}1/ma - \xi]1\tag{24} \]
 
 dove 1 è un vettore di tutti uni e serve per permettere la divisione tra vettore e scalare.
 Per cui siamo riusciti a trovare una soluzione ammissibile al problema e dimostrare quindi che esiste almeno una soluzione. Dimostrando così il Teorema 1. 
@@ -368,7 +368,7 @@ H_{T,T}  =  \begin{pmatrix}
  \end{pmatrix}\tag{26} 
 \end{equation}
 
-si minimizza $\sum\limit{x} x_i^2$ ovvero la (norma-$l^2$)^2. La dimensione della matrice H è $[T \times T]$ perchè il vettore $x$ è di dimensioni $[T \times 1]$ ovvero un vettore di lunghezza $T$, questo perchè abbiamo la possibilità di inserire un termine di manipolazione del reward $\epsilon_t$ fino al tempo $T$. I vincoli lineari sono espressi tramite la matrice $A$ e il vettore dei termini noti $b$, osserviamo che il vincolo è nella forma $\forall a \neq a^* : \tilde{\mu}_a^* \geq \tilde{\mu}_a + \xi$
+si minimizza $\sum_{i = 1}^T x_i^2$ ovvero la (norma-$l^2$)^2. La dimensione della matrice H è $[T \times T]$ perchè il vettore $x$ è di dimensioni $[T \times 1]$ ovvero un vettore di lunghezza $T$, questo perchè abbiamo la possibilità di inserire un termine di manipolazione del reward $\epsilon_t$ fino al tempo $T$. I vincoli lineari sono espressi tramite la matrice $A$ e il vettore dei termini noti $b$. Osserviamo che il vincolo è nella forma $\forall a \neq a^* : \tilde{\mu}_a^* \geq \tilde{\mu}_a + \xi$
 
 per cui la possiamo scrivere come: 
 
@@ -394,7 +394,7 @@ A =\bordermatrix{~ & \epsilon_{(1:m_{a_1})}  & \cdots&\cdots & \epsilon_{(m_{a_k
                    a_{K-1} & avg(a^*) - avg(a_{K-1}) - \xi  &\cr}\tag{30}
 \end{equation}
 
-La matrice $A:[(K-1) \times T]$ così formata modella i vincoli del problema $P_1$, ogni riga corrisponde ad un vincolo sul braccio $a \neq a^*$, dove sono state inserite nelle prime $m_{a_1}$ posizioni tutte le clausole sul primo vincolo in modo da interpretare $1/m_{a_1}$ per le volte in cui il decisore ha scelto il braccio $a_1$ in modo da modellizzare la funzione indicatrice $I(a_t = a_1)$. Stesso discorso per gli altri vincoli. Nelle ultime $m_{a^*}$ viene sottratta la quantità $-1/m_{a^*}$ per le volte che è stata vera la condizione $a_t = a^*$. Notare che non importa l'ordine con cui vengono inserite nelle righe i termini $1/m_a$ noi li consideriamo sequenziali per $m_a$ volte, non è necessario che il decisore prenda $m_a$ volte continuamente la stessa scelta $a$. Il vettore dei termini noti $b: [(K-1)\times 1]$ è costruito semplicemente sottraendo le medie stimate dei reward tra il braccio target $avg(a^*)$ e $avg(a) : \forall a \in A \neq a^*$. 
+La matrice $A:[(K-1) \times T]$ così formata modella i vincoli del problema $P_1$, ogni riga corrisponde ad un vincolo sul braccio $a \neq a^*$, dove sono state inserite nelle prime $m_{a_1}$ posizioni tutte le clausole sul primo vincolo in modo da interpretare $1/m_{a_1}$ per le volte in cui il decisore ha scelto il braccio $a_1$ in modo da modellizzare la funzione indicatrice $I(a_t = a_1)$. Stesso discorso per gli altri vincoli. Nelle ultime $m_{a^*}$ colonne viene sottratta la quantità $-1/m_{a^*}$ per le volte che è stata vera la condizione $a_t = a^*$. Notare che non importa l'ordine con cui vengono inserite nelle righe i termini $1/m_a$ noi li consideriamo sequenziali per $m_a$ volte, non è necessario che il decisore prenda $m_a$ volte continuamente la stessa scelta $a$. Il vettore dei termini noti $b: [(K-1)\times 1]$ è costruito semplicemente sottraendo le medie stimate dei reward tra il braccio target e gli altri bracci rispettivamente $avg(a^*)$ e $avg(a) : \forall a \in A, a \neq a^*$. 
 
 Per calcolare il vettore delle medie al $t = T+1$ è sufficiente osservare l'equazione ref:eqn.reward_scomp, è quindi possibile creare una matrice $C(K \times T)$:
 
@@ -437,7 +437,7 @@ file:Figure/attacks_over_e-greedy_dec_norm.png
 [[file:Figure/attacks_over_e-greedy_dec_bino.png]]
  
 
-*Commento risultati:* Dai risultati numerici ottenuti possiamo riportare le seguenti considerazioni: la prima è che i risultati ottenuti sono multo simili a quelli ottenuti nel paper studiato se non per i valori che sono differenti a causa dell'inizializzazione casuale del vettore dei valori attesi $\mu_a_{\in A}$. Come viene evidenziato in Figura ref:fig.a_egreedy_n e in Figura ref:fig.a_egreedy_dec, per tutti i tentativi compiuti l'attacco ha sempre successo, infatti a $t = T+1$ il decisore prende la scelta $K$ che corrisponde a $a^*$. Se non fosse stato eseguito l'attacco, in Figura ref:fig.no_attck la scelta presa al $t = T+1$ sarebbe stata la scelta 4, ovvero quella con la probabilità più alta. Infine, il costo di attacco mostrato nell'istogramma empirico dei ratio è del 35% per l'agente \epsilon-greedy decrescente ( valore diverso da quanto riportato nel paper, in Figura 3.a, pp 8) e inferiore del 4.5% per l'agente \epsilon-greedy. Viene riportato in Figura ref:fig.batched il diagramma delle frequenza di selezione per le $K$ scelte, in questo caso si è preso un batch di dimensione 100 sample, per cui in totale 10 batch. Come si vede dal grafico durante il primo batch è la prima scelta ad essere selezionata per il numero maggiore di tentativi. A questo punto i reward vengono manipolati ed inviati all'agente che, inconsapevole di essere vittima di un attacco, aggiorna la sua conoscenza. Poiché i reward sono stati manipolati, risulta che il braccio ottimo è il braccio $a^*$ obiettivo dell'attaccante. Dal secondo batch in poi sarà sempre $a^*$ il braccio che verrà selezionato il maggior numero di volte. In figura ref:fig.batched-cost il costo di attacco in funzione della grandezza dei batch. 
+*Commento risultati:* Dai risultati numerici ottenuti possiamo riportare le seguenti considerazioni: la prima è che i risultati ottenuti non sono molto simili a quelli ottenuti nel paper studiato infatti il costo di attacco è differente. Come viene evidenziato in Figura ref:fig.a_egreedy_n e in Figura ref:fig.a_egreedy_dec, per tutti i tentativi compiuti l'attacco ha sempre successo, infatti a $t = T+1$ il decisore prende la scelta $K$ che corrisponde a $a^*$. Se non fosse stato eseguito l'attacco, in Figura ref:fig.no_attck la scelta presa al $t = T+1$ sarebbe stata la scelta 4, ovvero quella con la probabilità più alta. Infine, il costo di attacco mostrato nell'istogramma empirico dei ratio è del 35% per l'agente \epsilon-greedy decrescente ( valore diverso da quanto riportato nel paper, in Figura 3.a, pp 8) e inferiore del 18% per l'agente \epsilon-greedy. Viene riportato in Figura ref:fig.batched il diagramma delle frequenza di selezione per le $K$ scelte, in questo caso si è preso un batch di dimensione 100 sample, per cui in totale 10 batch. Come si vede dal grafico durante il primo batch è la prima scelta ad essere selezionata per il numero maggiore di tentativi. A questo punto i reward vengono manipolati ed inviati all'agente che, inconsapevole di essere vittima di un attacco, aggiorna la sua conoscenza. Poiché i reward sono stati manipolati, risulta che il braccio ottimo è il braccio $a^*$ obiettivo dell'attaccante. Dal secondo batch in poi sarà sempre $a^*$ il braccio che verrà selezionato il maggior numero di volte. In figura ref:fig.batched-cost il costo di attacco in funzione della grandezza dei batch. 
 
 
 
@@ -452,11 +452,11 @@ file:Figure/attacks_over_e-greedy_dec_norm.png
 file:Figure/batchet_cost_e-greedy.png
  
 *** Upper Confident Bound (UCB)
-In questa sezione viene descritta la strategia di attacco ad un problema MAB che sfrutta l'algoritmo UCB. Il funzionamento di UCB è simile a \epsilon-greedy ed è descritto dall'equazione ref:eqn.ucb. Un vantaggio di UCB rispetto ad \epsilon-greedy è che non presenta nessun tipo di casualità per cui la strategia di attacco è valida per ogni tolleranza \delta (anche 0). Anche l'impostazione del problema di minimizzazione è molto simile, infatti si tratta solo di sistemare gli assi temporali nei vincoli, il nuovo problema di minimizzazione $P_2$ derivato dal problema P in ref:eqn.p è: 
+In questa sezione viene descritta la strategia di attacco ad un problema MAB che sfrutta l'algoritmo UCB. Il funzionamento di UCB è simile a \epsilon-greedy ed è descritto dall'equazione ref:eqn.ucb . Un vantaggio di UCB rispetto ad \epsilon-greedy è che non presenta nessun tipo di casualità per cui la strategia di attacco è valida per ogni tolleranza \delta (anche 0). Anche l'impostazione del problema di minimizzazione è molto simile, infatti si tratta solo di sistemare gli assi temporali nei vincoli, il nuovo problema di minimizzazione $P_2$ derivato dal problema P in ref:eqn.p è: 
 
 #+NAME: eqn.p2
 \begin{equation}
-P_2 :=  min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{ vincoli: }\begin{cases}
+P_2 :=  min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{, con vincoli: }\begin{cases}
       \tilde{\mu}_a^*(T+1) \geq \tilde{\mu}_a(T+1) + \xi  & \quad \forall a \neq a^*
  \end{cases}\tag{32}
 \end{equation}
@@ -492,21 +492,21 @@ file:Figure/attacks_over_ucb_norm.png
 In Figura [[ref:fig.ucb_off]] il grafico delle performance, come mostra la frequenza delle risposte, per tutti i 1000 trails la scelta al $t = T+1$ è sempre quella targhet $a^* = (K = 5)$. Inoltre il ratio rimane relativamente basso fermandosi al 2.5%. I risultati sono comparabili a quanto ottenuto dal paper in analisi.  
 
 *** Batch Succesive Eliminatios (BaSE)
-Questo algoritmo è una variate recente all'algoritmo /Successive Eliminatios/ proposta in [VVA12]. L'idea è quelle di esplorare i primi M-1 batch per poi selezionare durante l'ultimo batch la scelta ottima. Durante l'esplorazione degli M-1 batch vengono rimosse le scelte per i quali si prevede una scarsa probabilità di ottenere un reward. L'analisi degli autori si focalizza propio sulla scelta della soglia ottima oltre il quale un braccio può essere considerato come non più promettente e quindi rimuoverlo dalle future esplorazioni. Quello che si dimostra da un punto di vista algebrico è che la soglia oltre il quale rimuovere un scelta può essere espresso come differenza tra $max(\tilde{\mu}_a) - \tilde{\mu}_a, \forall a \in A$ è: 
+Questo algoritmo è una variate recente all'algoritmo /Successive Eliminatios/ proposta in [GHRZ19]. L'idea è quella di esplorare i primi M-1 batch per poi selezionare durante l'ultimo batch la scelta ottima. Durante l'esplorazione degli M-1 batch vengono rimosse le scelte per i quali si prevede una scarsa probabilità di ottenere un reward. L'analisi degli autori si focalizza propio sulla scelta della soglia ottima oltre il quale un braccio può essere considerato come non più promettente e quindi rimuoverlo dalle future esplorazioni. Quello che si dimostra da un punto di vista algebrico è che la soglia oltre il quale rimuovere un scelta può essere espresso come differenza tra $max(\tilde{\mu}_a) - \tilde{\mu}_a, \forall a \in A$ è: 
 
 \[ \max\limits_{a \in A}(\tilde{\mu}_a) - \tilde{\mu}_a \geq \sqrt{\frac{\gamma log(KT)}{N_a(t)}} \to A := A - \{a\}\tag{37} \]
 
 le medie empiriche $\tilde{\mu}_a$ vengono stimate dopo aver esplorato ogni batch. Durante l'ultimo batch verrà selezionata solo la scelta $a \in A$ tale che $a = arg\max\limits_{a \in A} \tilde{\mu_a}$
 
-Abbiamo già introdotto un esempio di \epslong-greedy con dimensione dei batch $M < T$, il flusso delle informazioni anche in BaSE segue quanto già visto: l'agente esegue il primo batch di prove, ovvero tira per lo stesso numero di volte le K scelte possibili, a questo punto l'ambiante genere un vettore di M prove. Prima che i reward siano inviati all'agente, vengono manipolati dall'attaccante e poi inviati all'agente. 
+Abbiamo già introdotto un esempio di \epsilon-greedy con dimensione dei batch $M < T$, il flusso delle informazioni anche in BaSE segue quanto già visto: l'agente esegue il primo batch di prove, ovvero tira per lo stesso numero di volte le K scelte possibili, a questo punto l'ambiente genera un vettore di M prove. Prima che i reward siano inviati all'agente, vengono manipolati dall'attaccante e poi inviati all'agente. 
 
-Poiché anche in questo caso si tratta di un algoritmo basato sulla stima empirica del valore atteso dei reward possiamo studiare un algoritmo di attacco con la metodologia vista per \epslong-greedy ed UCB. Per ulteriori dettagli sull'algoritmo BaSE e la scelta della soglia, si rimanda al paper originale. 
+Poiché anche in questo caso si tratta di un algoritmo basato sulla stima empirica del valore atteso dei reward possiamo studiare un algoritmo di attacco con la metodologia vista per \epsilon-greedy ed UCB. Per ulteriori dettagli sull'algoritmo BaSE e la scelta della soglia, si rimanda al paper originale. 
 
 Il valore atteso dei reward è calcolato per ogni batch, per cui l'agente calcola la media dei valori attesi per selezionare la scelta ottima. 
 Definiamo $\tilde{ \mu}_a$ come:
 \[ \tilde{\mu}_a = \tilde{\mu}_a(m-1)\rho + \tilde{\mu}_a(m)(1- \rho) \text{ con:  } m \in M, \rho = \frac{N_a(m-1)}{N_a(m-1) + N_a(m)}\tag{38}\]
  
-ovvero il valore atteso è una media ponderata tra il valore atteso calcolato durante il batch precedente e il valore atteso calcolato durante questo batch. 
+ovvero, il valore atteso è una media ponderata tra il valore atteso calcolato durante il batch precedente e il valore atteso calcolato durante questo batch. 
 Se adoperiamo l'attacco, ai reward si aggiunge un termine di manipolazioni per cui, dopo aver valutato M-1 batch possiamo scrivere:
 \[ \tilde{\mu}_a = avg(a) + \frac{1}{N_a(1)}\epsilon_a(1)I(a(1)_t = a)\rho^{M-1} + \sum_{m = 1}^{M-1} \frac{1}{N_a(m)}\epsilon_a(m)I(a(m)_t = a)(1 - \rho)\rho^{M-m}\tag{39}\]
 
@@ -527,7 +527,7 @@ Possiamo procedere anche in un altro modo, infatti, non è richiesto che la scel
 
 #+NAME: eqn.bs
 \begin{equation}
-P_{BA}: min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2  \text{ vincoli: }\begin{cases}
+P_{BA}: min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2  \text{, con vincoli: }\begin{cases}
      \tilde{\mu}_{a_{max}}(t+1) \geq \tilde{\mu}_a(t+1) + \xi, \forall a \neq a^*\\
 \tilde{\mu}_{a_{max}}(t+1) - \tilde{\mu}_{a^*}(t+1) < \sqrt{\frac{\gamma log(KT)}{N_{a^*}(t)}}\\
 \sum_a a_{max} = 1
@@ -535,7 +535,7 @@ P_{BA}: min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2  \text{ vincoli: }\begi
 \end{equation}
 
 Ovvero, il primo vincolo serve per cercare il braccio massimo, una volta selezionato il braccio massimo si deve soddisfare il vincolo imposto dall'algoritmo /BaSE/ in modo che il braccio targhet $a^*$ non sia eliminato dal set delle scelte disponibili. L'ultimo vincolo definisce la presenza di solo un braccio massimo $a_{max}$.
-Nella pratica risulta difficile da implementare, perchè richiede la possibilità di avere due variabili decisionali, ovvero gli $\overline{\epsilon_m}$ e di poter selezionare il massimo. Le funzioni software di MATLAB per le programmazione quadratica non prevedono (o comunque non è stato trovato il modo) per implementare questo problema. Ciò che è stato fatto è applicare una serie di ipotesi / rilassamenti. In prima istanza è stato implementato il vincolo ref.eqn.base_1. In pratica è come se $a^*$ sia sempre il massimo rispetto agli altri bracci con una distanza di $\gamma log(KT)/N_a(t)$. Cosi facendo alla fine del primo batch nell'insieme delle scelte possibili rimane solo $a^*$. 
+Nella pratica risulta difficile da implementare, perchè richiede la possibilità di avere due variabili decisionali, sia gli $\overline{\epsilon_m}$ e sia di poter selezionare il massimo. Le funzioni software di MATLAB per le programmazione quadratica non prevedono (o comunque non è stato trovato il modo) per implementare questo problema. Ciò che è stato fatto è applicare una serie di ipotesi / rilassamenti. In prima istanza è stato implementato il vincolo ref:eqn.base_1. In pratica è come se $a^*$ sia sempre il massimo rispetto agli altri bracci con una distanza di $\gamma log(KT)/N_a(t)$. Cosi facendo alla fine del primo batch nell'insieme delle scelte possibili rimane solo $a^*$. 
 
 Il secondo ragionamento fatto è stato implementare il seguente vincolo:  
 
@@ -547,7 +547,6 @@ Il secondo ragionamento fatto è stato implementare il seguente vincolo:
 In questo modo non è necessario che $a^*$ sia massimo. L'implementazione, è stato fatta in modo simile a quanto visto nei capitoli precedenti. Con la differenza che la media dei reward è calcolata come media ponderata. 
 
 La matrice A: 
-#+NAME: eqn.Matrix-A
 \begin{equation}
 A =\bordermatrix{~ & \epsilon_{(1:m_{a_1})}  & \cdots&\cdots & \epsilon_{(m_{a_k}:T)} \cr
                    a _1    & \frac{(1-\rho_{a_1})}{N_a_1(t)} & 0& \cdots               & -\frac{(1-\rho_{a^*})}{N_{a^*}(t)}     &\cr
@@ -562,10 +561,10 @@ A =\bordermatrix{~ & \epsilon_{(1:m_{a_1})}  & \cdots&\cdots & \epsilon_{(m_{a_k
                    a_{K-1} &  \sqrt{\frac{\gamma log(KT)}{N_{a^*}(t)}} - avg_{t-1}(a_{K-1})\rho_{a_1} - avg(a_{K-1})(t)(1-\rho_{a_{K-1}}) + avg_{t-1}(a^*)\rho_{a^*} - avg_t(a^*)(1-\rho_{a^*})   &\cr}\tag{44}\]
 
 mentre la matrice C è rimasta uguale a ref:eqn.Matrix-C.
-IL risultato è stato che il braccio targhet $a^*$ non veniva mai rimosso dal gruppo delle possibili scelte ma non rimaneva l'unica scelta possibile, quindi possiamo dire che la strategia di attacco prodotta dal vincolo ref:eqn.base_2 è fallimentare. Il problema risiede nel fatto che $a^*$ non riesce mai a diventare il braccio con \mu_a più alta.
+Il risultato è stato che il braccio targhet $a^*$ non veniva mai rimosso dal gruppo delle possibili scelte ma non rimaneva l'unica scelta possibile, quindi possiamo dire che la strategia di attacco prodotta dal vincolo ref:eqn.base_2 è fallimentare. Il problema risiede nel fatto che $a^*$ non riesce mai a diventare il braccio con \mu_a più alta. Per cui è possibile trovare una strategia di attacco con costo minore implementando ref:eqn.bs.
 
 *** Thompson-Sampling (TS)
-Gli algoritmi specifici visti precedentemente hanno una struttura molto simile e possono essere generalizzati a molte altre varianti perchè si basano sull'osservazione empirica della media dei reward. E' logico chiedersi se algoritmi basati sulla stima Bayesiana siano robusti a perturbazioni sui reward. Un'importate contributo degli autori del paper in analisi è stato mostrare come anche l'algoritmo Bayesiano Thompson-Sampling con distribuzione Gaussiana come distribuzione di supporto sia vulnerabile ad attacchi. L'algoritmo TS è spiegato in ref:eqn.ts, ricordiamo che \thata_a ha distribuzione $\sim N(\hat{u_a}(T)/\sigma^2, \sigma^2/m_a)$
+Gli algoritmi specifici visti precedentemente hanno una struttura molto simile e possono essere generalizzati a molte altre varianti perchè si basano sull'osservazione empirica della media dei reward. E' logico chiedersi se algoritmi basati sulla stima Bayesiana siano robusti a perturbazioni sui reward. Un'importate contributo degli autori del paper in analisi è stato mostrare come anche l'algoritmo Bayesiano Thompson-Sampling con distribuzione Gaussiana come distribuzione di supporto sia vulnerabile ad attacchi. L'algoritmo TS è spiegato in ref:eqn.ts, ricordiamo che \theta_a ha distribuzione $\sim N(\hat{u_a}(T)/\sigma^2, \sigma^2/m_a)$
 
 Procediamo quindi alla definizione del problema, abbiamo che:
 \[ \mathbb{P}(a_{T+1} \neq a^*) = \mathbb{P}(\cup_{a \neq a^*} \theta _{a^*} \leq \theta_a)\tag{45} \]
@@ -605,18 +604,18 @@ P_3 :=  min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{ vincoli: }\begin
 L'idea è quindi quella di fissare un \delta basso, in modo che la probabilità di non scegliere $a^*$ sia bassa. L'ultima condizione risulta spesso ridondante in quanto se $\delta \leq 0.5$, dalle proprietà della funzione di ripartizione sappiamo che l'argomento di \Phi(\cdot) è negativo, per cui $\tilde{\mu}_a(t) - \tilde{\mu}_{a^*}(t) \leq 0$ e il secondo vincolo dell'equazione ref:eqn.p3 risulta già essere soddisfatto.
 
 E' necessario verificare che i vincoli siano convessi, per far ciò sfruttiamo il lemma 2 qui riportato: 
-*Lemma 2.* Data una qualsiasi costante C_i > 0 per ogni i < K, la funzione $f(\overline{x}) = \sum_{i = 1}^{K-1} \Phi(C_ix_i - C_ix_k)$ è convessa nel dominio $D = (\overline{x}\in R^K | x_i - x_k \leq 0,\forall i < K)$.
+*Lemma 2.* Data una qualsiasi costante $C_i > 0$ per ogni $i < K$, la funzione $f(\overline{x}) = \sum_{i = 1}^{K-1} \Phi(C_ix_i - C_ix_k)$ è convessa nel dominio $D = (\overline{x}\in R^K | x_i - x_k \leq 0,\forall i < K)$.
 
 Per dimostrare il Lemma 2., si calcola la matrice Hessiana della funzione $f(x)$, dopodiché si verifica che la matrice sia semidefinita positiva. Possiamo quindi formulare il seguente teorema:
 
 *Teorema 3.* Per ogni \delta > 0, per ogni istanza {\overline{y}_a}_{a\in A} esiste almeno una soluzione ottima per $P_3$ che sia lineare nei vincoli. Per cui, dalla proposizione 1, esiste una strategia di attacco ottima per TS.
-Anche in questo caso la dimostrazione è analoga a quanto visto per \epslong-greedy e UCB.   
+Anche in questo caso la dimostrazione è analoga a quanto visto per \epsilon-greedy e UCB.   
 
 Possiamo rilassare ulteriormente il problema P_3, infatti:
 \[ \sum_{K-1} \Phi(x) \leq \delta \to \Phi(x) \leq \frac{\delta}{K-1}\tag{52}\]
 da cui $x \leq \Phi^{-1}(\delta / (K-1)) = cost$. Se fisso $\delta/ (K-1) \leq 0.5$ allora posso omettere il secondo vincolo del problema ref:eqn.p3, per cui $\delta \leq (K-1)/2$.
 
-Adoperando il rilassamento descritte al vincolo del problema $P_3$ posso scrivere: 
+Adoperando il rilassamento descritto al vincolo del problema $P_3$ posso scrivere: 
 
 \[\left( \frac{\tilde{\mu}_a(T) - \tilde{\mu}_a^*(T)}{\sigma^3 \sqrt{\frac{1}{m_a} + \frac{1}{m_{a^*}}}} \right) \leq \Phi^{-1} \left(\frac{\sigma}{K-1} \right)\tag{53} \]
 
@@ -636,7 +635,7 @@ P_4 :=  min \sum_{a\in A}\| \overline{\epsilon_a} \|_2^2 \text{ vincoli: }\begin
 
 con: $\sigma \leq \frac{K-1}{2}$
 
-Il problema $P_4$ non porta alla soluzione ottima formalizzata dal problema P, questo perchè è stato minimizzato un upper bound e non una quantità certa. Dai risultati numerici elaborati si osserva che la soluzione al problema $P_4$ porta il decisore a scegliere il braccio targhet ma lo fa con un costo comparabile a quello $P_3$ implementato dagli autori del paper. Operando gli stessi passaggi fatti anche per i casi \epsilon-greedy ed UCB possiamo riscrivere il vincolo come
+Il problema $P_4$ non porta alla soluzione ottima formalizzata dal problema $P$, questo perchè è stato minimizzato un upper bound e non una quantità certa. Dai risultati numerici elaborati si osserva che la soluzione al problema $P_4$ porta il decisore a scegliere il braccio targhet ma lo fa con un costo comparabile a quello $P_3$ implementato dagli autori del paper. Operando gli stessi passaggi fatti anche per i casi \epsilon-greedy ed UCB possiamo riscrivere il vincolo come
 
 \[ \forall a \in A : a \neq a^* : \frac{1}{m_a}I(a_t = a) - \frac{1}{m_{a^*}}I(a_t = a*) \leq avg(a^*) - avg(a) + \sigma^3 \sqrt{\frac{1}{m_a} + \frac{1}{m_{a^*}}} \Phi^{-1} \left(\frac{\sigma}{K-1} \right)\tag{56}  \] 
 
@@ -681,9 +680,9 @@ Nella realtà l'attaccante non conosce { $\mu_a$ }_{a \in A} per cui può indovi
 
 \[ \epsilon_t = -I(a_t \neq a^*)C_{a_t}\tag{61}  \]
 
-ovviamente deve essere : $( \forall a \in A, a \neq a^* : \mu_{a^*} < \mu_a \text{allora: } C_{a_t} \geq 0)$. Possiamo formulare quanto detto nella seguente proposizione: 
+ovviamente deve essere : $( \forall a \in A, a \neq a^* \text{ se } \mu_{a^*} < \mu_a \text{ allora: } C_{a_t} \geq 0)$. Possiamo formulare quanto detto nella seguente proposizione: 
 
-*Proposizione 4.* Assumiamo che ... . L'attacco tramite la costate {C_a}_{a \neq a^*} ha successo se e solo se $C_a > max(0,\mu_a - \mu_{a^*}), \forall a \neq a^*$.
+*Proposizione 4.* L'attacco tramite la costate {C_a}_{a \neq a^*} ha successo se e solo se $C_a > max(0,\mu_a - \mu_{a^*}), \forall a \neq a^*$.
 
 Supponiamo infatti che esista un braccio $i \neq a^*$ tale per cui $C_i \leq max(0,\mu_i - \mu_{a^*})$, in questo caso il braccio $i$ risulta essere ottimo rispetto al braccio $a^*$ infatti avremo che: $\mu_i - C_i \geq \mu_i - (\mu_i - \mu_{a^*}) \to \mu_i - C_i > \mu_{a^*}$. Nel caso in cui invece $C_i =  max(0,\mu_i - \mu_{a^*})$ avremo che il braccio $i$ e i braccio $a^*$ avranno lo stesso valore atteso $\mu_i = \mu_{a^*}$ per cui entrambi saranno ottimi. In entrambi i casi, l'attacco non ha successo. 
 
@@ -706,9 +705,9 @@ tale che, possiamo definire l'evento $E$ come:
 
 ovvero $\beta(\cdot)$ è il limite superiore della differenza tra la media stimata e la media ignota. Osserviamo come $\beta(\cdot)$ sia valida per qualunque $t$.   
 
-*Lemma 1.* Per $\sigma \in (0,1), \mathbb{P}(E) \geq 1 - \sigma$
+*Lemma 1.* /(Lemma 1 di [JLMZ18] )/ Per $\delta \in (0,1), \mathbb{P}(E) \geq 1 - \delta$
 
-Il risultato del Lemma 1 mostra come con una probabilità di $1-\sigma$:
+Il risultato del Lemma 1 mostra come con una probabilità di $1-\delta$:
 \[ \mu_a  = \tilde{\mu}_a(t) \pm \beta(N_a(t))\tag{65} \]
 
 per cui abbiamo che: 
@@ -727,16 +726,16 @@ Sapendo che $C_a(t)$ è definito come il limite superiore allora possiamo ottimi
 \[ \epsilon_t = -I(a_t \neq a^*) C_{a_t} = -I(a_t \neq a^*) max(0,\tilde{\mu}_a(t) -  \tilde{\mu}_{a^*}(t) + \beta(N_a(t)) + \beta(N_{a^*}(t))\tag{70}\]
 
 
-*Teorema 4.* Dato un qualunque $\sigma \in (0,1)$, assumiamo che l'algoritmo del bandito raggiunga in $O(logT)$ il limite superiore con probabilità $1-\sigma$. Allora, con probabilità $1 - 2\sigma$, l'attacco ACE forza l'algoritmo a scegliere il braccio $a^* N_{a^*}(T)$ volte con $N_{a^*}(T) = T - o(T)$  
+*Teorema 4.* Dato un qualunque $\delta \in (0,1/2)$, assumiamo che l'algoritmo del bandito raggiunga in $O(logT)$ il limite superiore con probabilità $1-\delta$. Allora, con probabilità $1 - 2\delta$, l'attacco ACE forza l'algoritmo a scegliere il braccio $a^*$ per $N_{a^*}(T)$ volte con $N_{a^*}(T) = T - o(T)$  
 
 *** Simulazioni numeriche: 
-Per le simulazioni numeriche sono stati utilizzati gli stessi parametri del paper, in particolare rumore normale con \sigma = 0.1, K è diverso dal paper, nel nostra caso $K = 5$, il braccio (scelta) target dell'attaccante ha \mu_{a^*} = 0, mentre \forall a \in A, a \neq a^* , \mu_a è estratta casualmente da una distribuzione uniforme $\sim U(0,1)$. Con questa configurazione il braccio targhet non dovrebbe mai essere scelto se non fosse presente l'attaccante. \delta = 0.05 e T = 10^4 time-step.
+Per le simulazioni numeriche sono stati utilizzati gli stessi parametri del paper, in particolare rumore normale con \sigma = 0.1, K è diverso dal paper, nel nostra caso $K = 5$, il braccio (scelta) target dell'attaccante ha \mu_{a^*} = 0 e si trova nella posizione $a_5, k = 5$, mentre \forall a \in A, a \neq a^* , \mu_a è estratta casualmente da una distribuzione uniforme $\sim U(0,1)$. Con questa configurazione il braccio targhet non dovrebbe mai essere scelto se non fosse presente l'attaccante. \delta = 0.05 e T = 10^4 time-step.
 
-*Commento Risultati:* Per come è stata impostata l'analisi, i risultati attesi dovrebbero essere molto simili a quanto mostrato dal paper. Il primo risultato che commenteremo riguarda l'attacco ACE su \epsilon-greedy e la variante \epsilon-greedy decrescente. Come si vede in Figura ref:fig.egr_online il costo cumulato rispecchia quanto riportato in [Figura 4.a, pp 8] con attenzione alla scala utilizzata. Infatti per \epsilon-greedy decrescente il costo dell'attacco cresce in modo rapido fino all'istante 10, dopodiché continua a cresce linearmente. Viceversa per \epsilon-greedy con $\epsilon = 0.1$ la crescita dopo l'istante $t = 10$ continua in modo esponenziale e questo è rappresentato dalla retta sul grafico con assi logaritmici. In entrambi i casi quello che si osserva è che il decisore, inconsapevole di essere vittima dell'attacco, seleziona il braccio $a^*$ come braccio ottimo. Leggera differenza nelle due strategie sta nel fatto che $\lim\limits_{ t \to \infty} 1/t \sim 0$ per cui dopo un certo $t$ la probabilità che il decisore prenda una scelta casuale è praticamente nulla per cui prende sempre la scelta che ritiene ottima, in questo caso $a^*$, se non avessimo fatto l'attacco invece, non avrebbe mai scelto $a*$. Utilizzando \epsilon-greedy con $\epsilon = 0.1$ costante nel tempo avremo che il 10% delle volte il decisore sceglierà in modo casuale una tra le $K$ possibili scelte. Dal grafico si vede molto bene come per il 91% delle volte circa il braccio scelto sia $a^*$ mentre il restante 10% è disperso tra le altre possibili $K-1$ scelte. Anche in questo caso se non avessi fatto l'attacco il decisore non avrebbe mai scelto $a^*$ se non con una probabilità inferiore del 2%. Per la variante \epsilon-greedy riportiamo anche la variante in cui il reward sia distribuito come una binomiale con probabilità di successo $\overline{p} = \mu_a, \forall a \in A$ mostrata in Figura ref:fig.egr_bino_online. Anche in questo caso il braccio scelto per quasi la totalità dei time-step $a^*$. Questo a indice dell'universalità della strategia ACE.
+*Commento Risultati:* Per come è stata impostata l'analisi, i risultati attesi dovrebbero essere molto simili a quanto mostrato dal paper. Il primo risultato che commenteremo riguarda l'attacco ACE su \epsilon-greedy e la variante \epsilon-greedy decrescente. Come si vede in Figura ref:fig.egr_online il costo cumulato rispecchia quanto riportato in [Figura 4.a, pp 8] con attenzione alla scala utilizzata. Infatti per \epsilon-greedy decrescente il costo dell'attacco cresce in modo rapido fino all'istante 10, dopodiché continua a cresce linearmente. Viceversa per \epsilon-greedy con $\epsilon = 0.1$ la crescita dopo l'istante $t = 10$ continua in modo esponenziale e questo è rappresentato dalla retta sul grafico con assi logaritmici. In entrambi i casi quello che si osserva è che il decisore, inconsapevole di essere vittima dell'attacco, seleziona il braccio $a^*$ come braccio ottimo. Leggera differenza nelle due strategie sta nel fatto che $\lim\limits_{ t \to \infty} 1/t \sim 0$ per cui dopo un certo $t$ la probabilità che il decisore prenda una scelta casuale è praticamente nulla per cui prende sempre la scelta che ritiene ottima, in questo caso $a^*$, se non avessimo fatto l'attacco invece, non avrebbe mai scelto $a*$. Utilizzando \epsilon-greedy con $\epsilon = 0.1$ costante nel tempo avremo che il 9% delle volte il decisore sceglierà in modo casuale una tra le $K$ possibili scelte. Dal grafico si vede molto bene come per il 91% delle volte circa il braccio scelto sia $a^*$ mentre il restante 10% è disperso tra le altre possibili $K-1$ scelte. Anche in questo caso se non avessi fatto l'attacco il decisore non avrebbe mai scelto $a^*$ se non con una probabilità inferiore del 2%. Per la variante \epsilon-greedy riportiamo anche la variante in cui il reward sia distribuito come una binomiale con probabilità di successo $\overline{p} = \mu_a, \forall a \in A$ mostrata in Figura ref:fig.egr_bino_online. Anche in questo caso il braccio scelto per quasi la totalità dei time-step $a^*$. Questo a indice dell'universalità della strategia ACE.
 
-In Figura ref:fig.ucb_online le performance ottenute con ACE su un problema MAB che sfrutta UBC. Anche in questo caso i risultati ottenuti sono sovrapponibili con quanto riportato in [figura 4.b, pp 8], il costo cumulato di attacco sembra crescere in modo esponenziale. Anche in questo caso il braccio targhet è scelto per quasi la totalità dei time-step.
+In Figura ref:fig.ucb_online le performance ottenute con ACE su un problema MAB che sfrutta UBC. Anche in questo caso i risultati ottenuti sono sovrapponibili con quanto riportato in [Figura 4.b, pp 8], il costo cumulato di attacco sembra crescere in modo esponenziale. Anche in questo caso il braccio targhet è scelto per quasi la totalità dei time-step.
 
-Per ultimo, in figura ref:fig.ts_online le performance ottenute con ACE su un problema che utilizza Thompson Sampling. Qui possiamo notare come la funzione di costo mantenga la stessa forma ma con valori assoluti diversi. Questo perchè, in modo diverso da quanto fatto nel paper di riferimento è stato implementato il problema $P_4$ frutto di diversi rilassamenti al problema originale $P$. Nel paper a seguito di una soluzione trovata, viene eseguita la ricerca ottima.   
+Per ultimo, in Figura ref:fig.ts_online le performance ottenute con ACE su un problema che utilizza Thompson Sampling. Qui possiamo notare come la funzione di costo mantenga la stessa forma ma con valori assoluti diversi. Questo perchè, in modo diverso da quanto fatto nel paper di riferimento è stato implementato il problema $P_4$ frutto di diversi rilassamenti al problema originale $P$. Nel paper a seguito di una soluzione trovata, viene eseguita la ricerca ottima.   
 
 
 #+CAPTION: Performance attacco sul problema MAB-(\epsilon-greedy) in due varianti,  con distribuzione degli errori $N(0,\sigma^2)$. Il primo grafico mostra l'errore cumulato in funzione di $t$. Il secondo grafico il numero delle volte in cui il decisore sceglie il braccio sub-ottimo $a^* (\mu_{a^*} = 0)$ in funzione del tempo $t$
@@ -819,7 +818,7 @@ Sempre in questo spazio, se posso, mi piacerebbe suggerire una "variante" al cor
 
 [fn:2] I passaggi seguiti per trovare la distribuzione a priori nel caso in cui i reward siano distribuiti come una binomiale sono stati presi da: [[https://en.wikipedia.org/wiki/Conjugate_prior][Conjungate Prior]].
 
-[fn:3] Quando $p(\cdot,theta)$ e $p(\theta)$ hanno la stessa distribuzione si dicono /coniugate/.
+[fn:3] Quando $p(\theta,\cdot)$ e $p(\theta)$ hanno la stessa distribuzione, allora $p(\cdot,\theta)$ e $p(\theta)$ si dicono /coniugate/.
 
 [fn:4] Facciamo l'assunzione che $F(\theta)$ sia differenziabile due volte con la derivata seconda continua.
 
