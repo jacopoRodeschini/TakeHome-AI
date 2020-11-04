@@ -15,7 +15,7 @@
 #+LATEX_HEADER: \usepackage{microtype}      % microtypography
 #+LATEX_HEADER: \hypersetup{colorlinks=true}
 #+latex_header: \hypersetup{colorlinks=true,linkcolor=blue}
-#+LATEX_HEADER: \documentclass[20pt]{article}
+#+LaTeX_HEADER: \usepackage{minted}
 
 
 \begin{abstract}
@@ -249,7 +249,7 @@ In questo lavoro, gli autori forniscono una struttura per studiare la robustezza
 * Studio del Paper
 
 Recentemente ([MJLZ18]), hanno dimostrano uno dei primi attacchi ad un problema MAB nella sua versione offline. In quel caso l'attaccante poteva manipolare i reward prima che venissero usati per l'update in modo da modificare il comportamento del decisore. Il risultato fondamentale raggiunto è stato dimostrare come una attacco ad un problema MAB possa essere formulato come un problema di ottimizzazione convessa.
-Come già introdotto nei capitoli precedenti, esistono numerose strategie e numerose varianti per risolvere il problema MAB, ognuna adattabile a situazioni particolari. Nei capitoli seguenti verranno studiati diversi algoritmi attaccanti, uno per ogni tipologia di strategia nella versione /offline/ per seguire poi alla descrizione della strategia /online/ e ad una sua formulazione generale per strategia di attacco.  
+Come già introdotto nei capitoli precedenti, esistono numerose strategie e numerose varianti per risolvere il problema MAB, ognuna adattabile a situazioni particolari. Nei capitoli seguenti verranno studiati diversi algoritmi attaccanti, uno per ogni tipologia di strategia nella versione /offline/ per seguire poi alla descrizione della strategia /online/ e ad una sua formulazione generale per strategia di attacco. Infine, nella sezione Appendice [[#sec:appendice]] alcuni dettagli sull'implementazione software.   
 
 ** Definizione del problema 
 
@@ -319,6 +319,9 @@ Questa nuova formulazione varrà più comoda nelle dimostrazioni presentate nei 
 e misura la frazione di costo rispetto al valore totale raggiunto dall'agente senza attacco.  
 
 *** $\epsilon$-greedy
+:PROPERTIES:
+:CUSTOM_ID: sec:greedy 
+:END:
 In questa sezione viene descritta la strategia di attacco ad un problema MAB che sfrutta l'algoritmo \epsilon-greedy. Il funzionamento di \epsilon-greedy è descritto da ref:eqn.egreedy. Il parametro \epsilon con cui l'algoritmo estrae casualmente una possibile scelta non è noto a priori e non può essere controllato dall'attaccante. Per fare in modo che il decisore selezioni la scelta $a^*$ è necessario che l'attaccante soddisfi questa condizione: $\forall a \in A, \tilde{\mu}_a^* \geq \tilde{\mu}_a$ ovvero il valore atteso dei reward di $a^*$ deve essere maggiore rispetto ai valori attesi per le altre possibile scelte. Inoltre deve essere che $\mathbb{P}(a_{T+1} = a^*) = 1 - \sigma$. Le due condizioni appena descritte possono essere riformulate come segue: $\tilde{\mu}_a^* \geq \tilde{\mu}_a + \xi$ dove $\xi > 0$ è una variabile di scarto (o di surplus) comunemente usata nei problemi di ottimizzazione. Chiaramente al diminuire di \xi anche $C(T)$ decresce. A livello pratico è anche possibile utilizzare l'uguaglianza: $\tilde{\mu}_a^* = \tilde{\mu}_a + \xi$, in questo modo la differenza tra il valore atteso della scelta $a^*$ e le altre possibili scelte sarà esattamente $\xi$.     
 
 Possiamo definire quindi il problema di ottimizzazione $P_1$ derivato dal problema P in ref:eqn.p specializzandolo per l'istanza \epsilon-greedy del problema MAB in questo modo:
@@ -349,12 +352,14 @@ Per cui siamo riusciti a trovare una soluzione ammissibile al problema e dimostr
 
 Successivamente aver dimostrato che $P_1$ è un problema di ottimizzazione quadratica con vincoli lineari, per risolverlo si è ricorsi alla programmazione quadratica definita come:
 
-\[ x = min_x \frac{1}{2} x^THx + f^tx \text{ con }   \begin{cases} 
+#+NAME: eqn.quadprog
+\begin{equation}
+ x = min_x \frac{1}{2} x^THx + f^tx \text{, con vincoli }   \begin{cases} 
     A  x \leq b  \\
     lb \leq x \leq ub\\
     Aeq x = beq
   \end{cases}\tag{25} 
-\]
+\end{equation}
 
 dove $H,A,Aeq = 0$ sono matrici, $f = 0,b,beq=0,lb = 0,ub = 0$ sono vettori, la costante $\frac{1}{2}$ non modifica la soluzione ottima del problema. Definendo la matrice H in questo modo:  
 
@@ -452,6 +457,9 @@ file:Figure/attacks_over_e-greedy_dec_norm.png
 file:Figure/batchet_cost_e-greedy.png
  
 *** Upper Confident Bound (UCB)
+:PROPERTIES:
+:CUSTOM_ID: sec:ucb
+:END:
 In questa sezione viene descritta la strategia di attacco ad un problema MAB che sfrutta l'algoritmo UCB. Il funzionamento di UCB è simile a \epsilon-greedy ed è descritto dall'equazione ref:eqn.ucb . Un vantaggio di UCB rispetto ad \epsilon-greedy è che non presenta nessun tipo di casualità per cui la strategia di attacco è valida per ogni tolleranza \delta (anche 0). Anche l'impostazione del problema di minimizzazione è molto simile, infatti si tratta solo di sistemare gli assi temporali nei vincoli, il nuovo problema di minimizzazione $P_2$ derivato dal problema P in ref:eqn.p è: 
 
 #+NAME: eqn.p2
@@ -492,6 +500,9 @@ file:Figure/attacks_over_ucb_norm.png
 In Figura [[ref:fig.ucb_off]] il grafico delle performance, come mostra la frequenza delle risposte, per tutti i 1000 trails la scelta al $t = T+1$ è sempre quella targhet $a^* = (K = 5)$. Inoltre il ratio rimane relativamente basso fermandosi al 2.5%. I risultati sono comparabili a quanto ottenuto dal paper in analisi.  
 
 *** Batch Succesive Eliminatios (BaSE)
+:PROPERTIES:
+:CUSTOM_ID: sec:base
+:END:
 Questo algoritmo è una variate recente all'algoritmo /Successive Eliminatios/ proposta in [GHRZ19]. L'idea è quella di esplorare i primi M-1 batch per poi selezionare durante l'ultimo batch la scelta ottima. Durante l'esplorazione degli M-1 batch vengono rimosse le scelte per i quali si prevede una scarsa probabilità di ottenere un reward. L'analisi degli autori si focalizza propio sulla scelta della soglia ottima oltre il quale un braccio può essere considerato come non più promettente e quindi rimuoverlo dalle future esplorazioni. Quello che si dimostra da un punto di vista algebrico è che la soglia oltre il quale rimuovere un scelta può essere espresso come differenza tra $max(\tilde{\mu}_a) - \tilde{\mu}_a, \forall a \in A$ è: 
 
 \[ \max\limits_{a \in A}(\tilde{\mu}_a) - \tilde{\mu}_a \geq \sqrt{\frac{\gamma log(KT)}{N_a(t)}} \to A := A - \{a\}\tag{37} \]
@@ -564,6 +575,9 @@ mentre la matrice C è rimasta uguale a ref:eqn.Matrix-C.
 Il risultato è stato che il braccio targhet $a^*$ non veniva mai rimosso dal gruppo delle possibili scelte ma non rimaneva l'unica scelta possibile, quindi possiamo dire che la strategia di attacco prodotta dal vincolo ref:eqn.base_2 è fallimentare. Il problema risiede nel fatto che $a^*$ non riesce mai a diventare il braccio con \mu_a più alta. Per cui è possibile trovare una strategia di attacco con costo minore implementando ref:eqn.bs.
 
 *** Thompson-Sampling (TS)
+:PROPERTIES:
+:CUSTOM_ID: sec:ts 
+:END:
 Gli algoritmi specifici visti precedentemente hanno una struttura molto simile e possono essere generalizzati a molte altre varianti perchè si basano sull'osservazione empirica della media dei reward. E' logico chiedersi se algoritmi basati sulla stima Bayesiana siano robusti a perturbazioni sui reward. Un'importate contributo degli autori del paper in analisi è stato mostrare come anche l'algoritmo Bayesiano Thompson-Sampling con distribuzione Gaussiana come distribuzione di supporto sia vulnerabile ad attacchi. L'algoritmo TS è spiegato in ref:eqn.ts, ricordiamo che \theta_a ha distribuzione $\sim N(\hat{u_a}(T)/\sigma^2, \sigma^2/m_a)$
 
 Procediamo quindi alla definizione del problema, abbiamo che:
@@ -697,7 +711,10 @@ L'idea è che l'attaccante aggiorni le quantità $\mu_a - \mu_{a^*}$ in base ad 
 
 Dato $\delta \in (0,1)$, definiamo la funzione $\beta(n)$ come:
 
-\[\beta(n) = \sqrt{ \frac{2\sigma^2}{n}log\frac{\pi^2Kn^2}{3\delta}}\tag{63}\]
+#+NAME: eqn.beta
+\begin{equation}
+\beta(n) = \sqrt{ \frac{2\sigma^2}{n}log\frac{\pi^2Kn^2}{3\delta}}\tag{63}
+\end{equation}
 
 tale che, possiamo definire l'evento $E$ come: 
 
@@ -723,7 +740,11 @@ da cui possiamo ricavare che (sottrarre i minimi con i massimi e viceversa):
 
 Sapendo che $C_a(t)$ è definito come il limite superiore allora possiamo ottimizzare il seguente attacco: 
 
-\[ \epsilon_t = -I(a_t \neq a^*) C_{a_t} = -I(a_t \neq a^*) max(0,\tilde{\mu}_a(t) -  \tilde{\mu}_{a^*}(t) + \beta(N_a(t)) + \beta(N_{a^*}(t))\tag{70}\]
+#+NAME: eqn.ace_att
+\begin{equation}
+\epsilon_t = -I(a_t \neq a^*) C_{a_t} = -I(a_t \neq a^*) max(0,\tilde{\mu}_a(t) -  \tilde{\mu}_{a^*}(t) + \beta(N_a(t)) + \beta(N_{a^*}(t))\tag{70}
+\end{equation}
+
 
 
 *Teorema 4.* Dato un qualunque $\delta \in (0,1/2)$, assumiamo che l'algoritmo del bandito raggiunga in $O(logT)$ il limite superiore con probabilità $1-\delta$. Allora, con probabilità $1 - 2\delta$, l'attacco ACE forza l'algoritmo a scegliere il braccio $a^*$ per $N_{a^*}(T)$ volte con $N_{a^*}(T) = T - o(T)$  
@@ -808,8 +829,167 @@ Sempre in questo spazio, se posso, mi piacerebbe suggerire una "variante" al cor
 [WC18] Yizhen Wang e Kamalika Chaudhuri: Data poisoning attacks against online learning. /arXiv preprint 1808. 08994/ , 2018.
 
 [XBBFER15] Huang Xiao, Battista Biggio, Gavin Brown, Giorgio Fumera, Claudia Eckert e Fabio Roli: Is feature selection secure against training data poisoning? In /International Conference on Machine Learning/, pp. 1689–1698, 2015.
+   
+* Appendice 
+:PROPERTIES:
+:CUSTOM_ID: sec:appendice
+:END:
 
-\emph{$\sim$} /Probabilmente tutto ciò che ho fatto verrà dimenticato nel tempo, ciò che solo deve rimanere è il metodo, cosicché un giorno potrò rifare quanto fatto senza avere bisogno di ricordare/ \emph{$\sim$}    
+In questa sezione viene descritta l'implementazione MATLAB, poichè, come descritto nei capitoli precedenti, sono tutte molto simili, vengono riportate solo le implementazioni degli attacchi per il problema /TS/ offline e per l'algoritmo online adattativo. Il codice implementato si trova al seguente indirizzo: https://github.com/jacopoRodeschini/TakeHome-AI/tree/master/Code.
+
+Per le altre implementazioni offline, in accordo a quanto specificato ai paragrafi [[#sec:greedy]], [[#sec:ucb]],  [[#sec:base]],  [[#sec:ts]]: cambia il vettore dei termini noti $b$.
+
+#+BEGIN_SRC matlab
+K = size(succ,2);
+T = size(succ,1);
+R = size(succ,3);
+
+sigma = opts.sigma; % varianza dell'errore
+opt = opts.opt;     % opzioni per programmazione linerare
+ski = opts.ski;     % variabile surplus programmazione linerare
+delta = opts.delta; % p = 1 - delta 
+
+ch_next = NaN(R,1);
+cost = NaN(R,1);
+
+
+for j = 1:R    
+     
+    % info che servono al manipolatore
+    cnt = nansum(ch(:,:,j)); % frequenza delle scelte
+    avg = nanmean(succ(:,:,j)); % media stimata
+    % inizializzazione problema di ottimizzazione (linear programming)
+    
+    H = eye(T);
+    
+    % vincoli sul problema di ottimizzazione,
+    % poichè ho scelto un sigma che soddisfa la disequazione, posso evitare
+    % di inserire il secondo vincolo, poichè risulta che il primo è molto
+    % piu stringente 
+    A = zeros(K-1,T); 
+    of = 0; 
+    % attenzione: il branch K è il nostro traget
+    
+    % matrice dei coefficienti A
+    % attenzione a come sono ordinati i coeff. all'interno della matrice, i
+    % risultati non cambiano ma cambia l'interpretazione 
+    for i = 1:(K-1)
+        A(i,of+1:of+cnt(i)) =   ones(1,cnt(i))./cnt(i); 
+        A(i,T-cnt(K)+1:T) =   -ones(1,cnt(K))./cnt(K); 
+        of = of + cnt(i);
+    end
+    % va agg. un vincolo sulla riga K
+    
+    % vettore dei termini noti  
+    b = ones(K-1,1)*avg(K);
+    b = b - avg(1:end-1)' + ...
+        norminv(delta/(K-1))*sigma^3*sqrt(1./cnt(1:K-1) + 1/cnt(K))';
+    
+    % risolutore 
+    % x: soluzione ottima ovvero overmo tutti i "rumori" dallo step 1 allo
+    % step T, ordinati come la matrice A da applicare ai reward ottenuti 
+    
+    x = quadprog(H,[],A,b,[],[],[],[],[],opt); % SOLUZIONE AMMISSIBILE
+    
+    % verifichiamo la soluzione
+    % ovvero che al tempo T+1 il braccio scelto sia appunto il braccio K,
+    % per far cio ricalcoliamo 
+    
+    C = zeros(K,T); % matrice dei coeff. 
+    C(1:end-1,1:T-cnt(K)) = A(:,1:T-cnt(K));
+    C(end,T-cnt(K)+1:end) = ones(1,cnt(K))/cnt(K);
+    
+    
+    % costo tot
+    c = 0;
+    for i = 1:K-1
+        c = c + normcdf(((avg(i) + C(i,:)*x) - (avg(i) + C(K,:)*x))...
+            / (sigma^3 * sqrt(1/cnt(i) + 1/cnt(K))) );
+    end
+    c = c - delta;
+    if c <= 0 
+        % calocolo nuove scelta tramite l'update delle medie
+        [m, t] = max(avg + (C*x)');
+        % scelta al passo al T + 1
+        ch_next(j) = t;
+
+        % ratio
+        cost(j) = x' * x;
+    end
+end
+#+END_SRC
+
+Nel primo frame riportato, si implementa l'algoritmo per TS. In accordo con [[#sec:ts]] la matrice A è composta dai termini $1 / m_a$ e $-1/m_a^*$ per tutti gli $a \neq a^*$. Il vettore dei termini noti $b$, implementa la costante: $avg(a^*) - avg(a) + \sigma^3 \sqrt{\frac{1}{m_a} + \frac{1}{m_{a^*}}} \Phi^{-1} \left(\frac{\sigma}{K-1} \right)$. Per calcolare $\Phi^{-1}$ si utilizza il comando $norminv(p)$ che calcola l'inverso della distribuzione cumulata normale per la probabilità $p$.
+Per risolvere il problema di ottimizzazione quadratica si utilizza il comando $quadprog(H,[],A,b)$ dove $A$ e $b$, in accordo con ref:eqn.quadprog, implementano il vincolo $Ax \leq b$. Successivamente viene verificato il primo vincolo definito in ref:eqn.p3, per cui, se è soddisfatto il vincolo  di $c - \delta \leq 0$ viene calcolata la media dei rewar per le diverse scelte con l'aggiunta dell'errore introdotto dall'attaccante. Alla riga 70 si nota come la media dei reward è composta dai due termini: il contributo portato dal reward generato dall'ambiente: $avg(a)$ e il contributo dell'attaccante $\frac{1}{m_a}\epsilon_aI(a_t = a)$. Il decisore quindi, seleziona il massimo della quantità appena calcolata che diventa la scleta all'istante $T+1$. Infine viene calcolato il costo dell'attacco come norma-$l^2$.    
+
+Viene ora riportata l'implementazione per l'attacco ACE (Attacks Constant Estimation). Una leggera differenza con quella riportata nella repository è che in questo contesto sono state tolte le parti in cui si computa il risultato nella situazioe in cui non ci fosse stato l'attacco, per mostrare con più chiarezza il ruolo dell'attaccante. La strategie /ACE/ è generale, ovvero si adatta all'istanza del problema. In particolare, sino alla riga 40 si simula l'agente (in questo caso TS) dalla riga 44 in poi si simula l'attaccante. Per cui per simularlo con altre istanze del problema MAB è sufficiente che siano modificate solo le prime 40 righe. 
+
+#+BEGIN_SRC matlab
+clear all
+rng default
+
+R = 10;  % round
+T = 1e4; % timestep
+K = 5;    % number of branch
+target = K; % il targhet è sempre l'ultima braccio
+ind = ones(K,1); % funzione indicatrice
+ind(target) = 0;
+
+sigma = 0.1;  % e-greedy
+eps = 0.1;    % e-greedy tradeoff (static)
+delta = 0.05; % attack
+
+% universal B(n) functions
+beta = @(n) sqrt(2*sigma^2/n*log(pi^2*n*K^2/(3*delta)));
+
+mu = [rand(1,K-1) 0]; % random expected values U(0,1);
+
+
+rewa = NaN(T,K,R);
+Target = NaN(T,R);
+
+
+for r = 1:R
+   cnt = zeros(1,K);
+   cntNot = zeros(1,K);
+   avgU = zeros(1,K);
+   for t = 1:T
+        if t<=K
+            dec = t;
+           
+        else 
+            rd = randn;
+            avg = nanmean(rewa(:,:,r)); % mean branch (bias) 
+            avg(isnan(avg)) = 0;
+            [m ,dec] = nanmax(avg/(sigma^2) + rd*sqrt(sigma^2./cnt));
+       
+        end
+  
+        rd = randn; 
+        rw = mu(dec) + rd*sigma;  
+
+        avgU(dec) = (avgU(dec) * (cnt(dec)) + rw) / (cnt(dec) + 1);
+        
+        cnt(dec) = cnt(dec)+1;
+             
+        if t <= K
+            att = 0; % non esguo nessun attocco
+        else
+            att = -ind(dec) *nanmax(0,avgU(dec) - avgU(K) ...
+                      + beta(cnt(dec)) + beta(cnt(K)));
+        end
+        c(t,r) = abs(att); % norma 1
+        rewa(t,dec,r) = rw + att;
+        Target(t,r) = dec;
+         
+    end
+end         
+#+END_SRC
+
+Come possiamo osservare, nel secondo frame di codice, a differenza di quanto visto per la versione offline, l'attacco viene eseguito ad ogni turno. Alla riga 42 si simula il reward generato dall'ambiente. L'attaccante (riga 44) calcola la media /unbiased/ dei reward prima che siano affetti dalla manipolazione. Alla riga 51, in accordo con ref:eqn.ace_att, viene calcolata la stretagia di attacco: $\epsilon_t = -I(a_t \neq a^*) C_{a_t} = -I(a_t \neq a^*) max(0,\tilde{\mu}_a(t) -  \tilde{\mu}_{a^*}(t) + \beta(N_a(t)) + \beta(N_{a^*}(t))$ dove $\beta(n)$ è definita in ref:eqn.beta. Il termine $-I(a_t \neq a^*)$ è codificato tramite $-ind(dec)$ che è un vettore "indicatrice" del fatto che il braccio sia il braccio target , in tal caso assume il valore 0, oppure uno degli altri possibli $K-1$ bracci e in tal caso assume il valore 1.
+Poichè siamo nella strategia online, il costo è calcolato come norma-$l^1$. Infine, alla riga 55, viene calcolato il reward manipolato dall'attaccante che viene "passato" all'agente.   
+
+\emph{$\sim$} /Probabilmente tutto ciò che ho fatto verrà dimenticato nel tempo, ciò che solo deve rimanere è il metodo, cosicché un giorno potrò rifare quanto fatto senza avere bisogno di ricordare/ \emph{$\sim$} 
 
 * Footnotes
 
@@ -820,7 +1000,7 @@ Sempre in questo spazio, se posso, mi piacerebbe suggerire una "variante" al cor
 
 [fn:3] Quando $p(\theta,\cdot)$ e $p(\theta)$ hanno la stessa distribuzione, allora $p(\cdot,\theta)$ e $p(\theta)$ si dicono /coniugate/.
 
-[fn:4] Facciamo l'assunzione che $F(\theta)$ sia differenziabile due volte con la derivata seconda continua.
+[fn:4] Facciamo l'assunzione che $F(\theta)$ sia differenziabile due vote con la derivata seconda continua.
 
 
 

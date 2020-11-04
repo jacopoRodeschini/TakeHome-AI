@@ -60,7 +60,7 @@ for j = 1:R
     C(end,T-cnt(K)+1:end) = ones(1,cnt(K))/cnt(K);
     
     
-    % costo tot
+    % verifico condizione
     c = 0;
     for i = 1:K-1
         c = c + normcdf(((avg(i) + C(i,:)*x) - (avg(i) + C(K,:)*x))...
@@ -68,7 +68,7 @@ for j = 1:R
     end
     c = c - delta;
     if c <= 0 
-        % calocolo nuove scelta tramite l'update delle medie
+        % caloclo nuove scelta tramite l'update delle medie
         [m, t] = max(avg + (C*x)');
         % scelta al passo al T + 1
         ch_next(j) = t;
