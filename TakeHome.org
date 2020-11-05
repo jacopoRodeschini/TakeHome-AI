@@ -785,8 +785,6 @@ Gli autori forniscono una metodologia per implementare una possibile strategia d
 
 Il lavoro di attività di analisi sul paper è stato molto stimolante e, per capirne appieno le potenzialità sono stati ricavati molti dei passaggi matematici mostrati per poi essere implementati al calcolatore. L'attività è parsa subito interessante in quanto mi ha permesso di esplorare il settore degli algoritmi di apprendimento per /Reinforcement Learning/ molto popolari a livello industriale e sopratutto ha dato luce al problema degli attacchi ai sistemi di apprendimento tramite /avvelenamento dei dati/ di cui non avevo mai sentito parlare ne letto nulla. Va detto, che in alcuni punti, soprattutto di [KKM13] e [MJLZ18] è stato difficile interpretare quando detto dagli autori per la mancanza di strumenti matematici adeguati per affrontare i passaggi mostrati. Un altro aspetto particolarmente interessante è stato vedere come vengono "creati" gli algoritmi, che seppure semplici (come in questo caso, non più di 30 righe di codice) godono di una rigorosa trattazione teorica che ne definisce dapprima le caratteristiche ed i limiti dimostrati poi tramite simulazioni numeriche.  
 
-Sempre in questo spazio, se posso, mi piacerebbe suggerire una "variante" al corso di /Intelligenza Artificiale/ tenuto dal professore /Francesco Trovò/, in quanto vista l'importanza che riscuote l'argomento avrei seguito con interesse lezioni introduttive alla stima Bayesiana e alla dimostrazione di qualche teorema, per avere almeno qualche riferimento di dove andare a cercare nel momento in cui essa viene utilizzata.
-
 * Bibliografia e testi consultati 
 
 [AZB16] Scott Alfeld, Xiaojin Zhu e Paul Barford: Data poisoning attacks against autoregressive models. n /AAAI/, pp. 1452–1458, 2016.
@@ -989,7 +987,6 @@ end
 Come possiamo osservare, nel secondo frame di codice, a differenza di quanto visto per la versione offline, l'attacco viene eseguito ad ogni turno. Alla riga 42 si simula il reward generato dall'ambiente. L'attaccante (riga 44) calcola la media /unbiased/ dei reward prima che siano affetti dalla manipolazione. Alla riga 51, in accordo con ref:eqn.ace_att, viene calcolata la stretagia di attacco: $\epsilon_t = -I(a_t \neq a^*) C_{a_t} = -I(a_t \neq a^*) max(0,\tilde{\mu}_a(t) -  \tilde{\mu}_{a^*}(t) + \beta(N_a(t)) + \beta(N_{a^*}(t))$ dove $\beta(n)$ è definita in ref:eqn.beta. Il termine $-I(a_t \neq a^*)$ è codificato tramite $-ind(dec)$ che è un vettore "indicatrice" del fatto che il braccio sia il braccio target , in tal caso assume il valore 0, oppure uno degli altri possibli $K-1$ bracci e in tal caso assume il valore 1.
 Poichè siamo nella strategia online, il costo è calcolato come norma-$l^1$. Infine, alla riga 55, viene calcolato il reward manipolato dall'attaccante che viene "passato" all'agente.   
 
-\emph{$\sim$} /Probabilmente tutto ciò che ho fatto verrà dimenticato nel tempo, ciò che solo deve rimanere è il metodo, cosicché un giorno potrò rifare quanto fatto senza avere bisogno di ricordare/ \emph{$\sim$} 
 
 * Footnotes
 
